@@ -1,0 +1,1 @@
+# Travel Agent App\n\nPersonal travel planning AI chat interface powered by n8n multi-agent workflow.\n\n## Setup\n\n```bash\nnpm install\nnpm run dev\n```\n\n## Build\n\n```bash\nnpm run build\n```\n\nDeploy the `dist` folder to any static hosting.
