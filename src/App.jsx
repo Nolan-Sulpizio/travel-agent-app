@@ -24,7 +24,7 @@ function App() {
     setMessages([{
       id: uuidv4(),
       role: 'assistant',
-      content: "Welcome! I'm your personal travel planning team—three experts working together to craft your perfect trip. Tell me where you'd like to go, when, and what kind of experience you're looking for. The more details, the better!",
+      content: "Hey! I'm Nolan's AI travel squad—three agents working together to plan your perfect trip. One finds the luxury options, one hunts for deals, and I synthesize the best of both. Tell me where you want to go and when!",
       timestamp: new Date()
     }])
   }, [])
@@ -93,7 +93,7 @@ function App() {
     setMessages([{
       id: uuidv4(),
       role: 'assistant',
-      content: "Fresh start! Tell me about your next adventure.",
+      content: "Fresh start! Where to next?",
       timestamp: new Date()
     }])
   }
@@ -133,7 +133,7 @@ function App() {
       </main>
       
       <footer className="footer">
-        <p>Powered by AI agents collaborating to find your perfect trip</p>
+        <p>Built by Nolan with Claude + n8n</p>
       </footer>
     </div>
   )
