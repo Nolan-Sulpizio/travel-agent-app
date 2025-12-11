@@ -24,7 +24,7 @@ function App() {
     setMessages([{
       id: uuidv4(),
       role: 'assistant',
-      content: "Hey! I'm Nolan's AI travel squad—three agents working together to plan your perfect trip. One finds the luxury options, one hunts for deals, and I synthesize the best of both. Tell me where you want to go and when!",
+      content: "Hey! I'm Nolan's AI travel squad—three agents researching your perfect trip in parallel. Tell me: **where** you want to go, **when**, **how many travelers**, and whether you're chasing **luxury, deals, or best value**. The more context (occasion, vibe, must-dos), the better I can tailor it!",
       timestamp: new Date()
     }])
   }, [])
