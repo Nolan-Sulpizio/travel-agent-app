@@ -7,8 +7,8 @@ function Header({ onClear }) {
         <div className="logo">
           <span className="logo-icon">✈</span>
           <div className="logo-text">
-            <h1>Travel Agent</h1>
-            <span className="tagline">Your Personal Trip Planner</span>
+            <h1>Nolan's Travel Agent</h1>
+            <span className="tagline">AI-Powered Trip Planning</span>
           </div>
         </div>
         <button className="clear-btn" onClick={onClear}>
