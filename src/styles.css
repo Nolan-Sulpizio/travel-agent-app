@@ -348,6 +348,45 @@ html, body {
   background: var(--text-secondary);
 }
 
+/* Copy Button */
+.message-content {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.375rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-content:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  background: var(--white);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+.copy-btn.copied {
+  opacity: 1;
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
 /* Mobile Responsive */
 @media (max-width: 640px) {
   .header {
@@ -372,5 +411,9 @@ html, body {
   
   .chat-input-form {
     padding: 0.75rem 1rem 1rem;
+  }
+
+  .copy-btn {
+    opacity: 0.7;
   }
 }
