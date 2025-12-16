@@ -1,3 +1,13 @@
+/**
+ * Travel Agent App - Main Application Component
+ * 
+ * Orchestrates the AI-powered travel planning chat interface.
+ * Manages conversation state, session handling, and communication
+ * with the n8n multi-agent workflow backend.
+ * 
+ * @module App
+ */
+
 import React, { useState, useRef, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import ChatMessage from './components/ChatMessage'
@@ -5,10 +15,25 @@ import ChatInput from './components/ChatInput'
 import Header from './components/Header'
 import QuickPicks from './components/QuickPicks'
 
-const WEBHOOK_URL = 'https://cleanplateinnovations.app.n8n.cloud/webhook/62c3bf2e-d431-49ad-b52f-ce257193a764/chat'
+/**
+ * Webhook URL for the n8n travel agent workflow.
+ * Configure via VITE_WEBHOOK_URL environment variable.
+ * @constant {string}
+ */
+const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL || 'https://cleanplateinnovations.app.n8n.cloud/webhook/62c3bf2e-d431-49ad-b52f-ce257193a764/chat'
 
+/**
+ * Initial welcome message displayed to users.
+ * Explains the multi-agent system and required input format.
+ * @constant {string}
+ */
 const WELCOME_MESSAGE = "Hey! I'm Nolan's AI travel squad—three agents researching your perfect trip in parallel. Tell me: **where** you want to go, **when**, **how many travelers**, and whether you're chasing **luxury, deals, or best value**. The more context (occasion, vibe, must-dos), the better I can tailor it!"
 
+/**
+ * Rotating messages displayed during API calls.
+ * Provides feedback about what the agents are doing.
+ * @constant {string[]}
+ */
 const LOADING_MESSAGES = [
   "The Snob is browsing five-star hotels...",
   "The Miser is hunting for deals...",
@@ -19,34 +44,74 @@ const LOADING_MESSAGES = [
   "Finding the perfect balance..."
 ]
 
+/**
+ * Message object structure used throughout the application.
+ * @typedef {Object} Message
+ * @property {string} id - Unique identifier (UUIDv4)
+ * @property {'user'|'assistant'} role - Message sender
+ * @property {string} content - Message text content
+ * @property {Date} timestamp - When the message was created
+ * @property {boolean} [isWelcome] - True for initial welcome message
+ * @property {boolean} [isError] - True for error messages
+ */
+
+/**
+ * Main application component.
+ * 
+ * Responsibilities:
+ * - Manages conversation state (messages array)
+ * - Handles session persistence via UUIDv4
+ * - Communicates with n8n webhook backend
+ * - Coordinates theme, loading states, and celebrations
+ * 
+ * @returns {JSX.Element} The rendered application
+ */
 function App() {
+  // Conversation state
   const [messages, setMessages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
+  
+  // Session ID persists for the entire conversation
+  // Enables n8n to maintain context across messages
   const [sessionId] = useState(() => uuidv4())
+  
+  // UI state
   const [darkMode, setDarkMode] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
+  
+  // Refs for scroll behavior and loading interval cleanup
   const messagesEndRef = useRef(null)
   const loadingIntervalRef = useRef(null)
 
+  /**
+   * Scrolls the message container to show the latest message.
+   * Uses smooth scrolling for better UX.
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
+  // Initialize dark mode from system preference
   useEffect(() => {
-    // Check system preference for dark mode
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     setDarkMode(prefersDark)
   }, [])
 
+  // Apply dark mode class to body for global styling
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode)
   }, [darkMode])
 
+  /**
+   * Creates the initial welcome message object.
+   * @returns {Message} Welcome message
+   */
   const createWelcomeMessage = () => ({
     id: uuidv4(),
     role: 'assistant',
@@ -55,10 +120,15 @@ function App() {
     isWelcome: true
   })
 
+  // Show welcome message on mount
   useEffect(() => {
     setMessages([createWelcomeMessage()])
   }, [])
 
+  /**
+   * Starts rotating through loading messages.
+   * Updates every 3 seconds to indicate ongoing agent activity.
+   */
   const startLoadingMessages = () => {
     let index = 0
     setLoadingMessage(LOADING_MESSAGES[0])
@@ -68,6 +138,10 @@ function App() {
     }, 3000)
   }
 
+  /**
+   * Stops the loading message rotation.
+   * Called when API response is received.
+   */
   const stopLoadingMessages = () => {
     if (loadingIntervalRef.current) {
       clearInterval(loadingIntervalRef.current)
@@ -75,9 +149,23 @@ function App() {
     }
   }
 
+  /**
+   * Sends a message to the n8n webhook and handles the response.
+   * 
+   * Flow:
+   * 1. Add user message to state
+   * 2. Set loading state
+   * 3. POST to webhook with sessionId and message
+   * 4. Parse response (handles multiple response formats)
+   * 5. Add assistant message to state
+   * 6. Trigger confetti if itinerary detected
+   * 
+   * @param {string} content - The user's message text
+   */
   const sendMessage = async (content) => {
     if (!content.trim() || isLoading) return
 
+    // Create and add user message
     const userMessage = {
       id: uuidv4(),
       role: 'user',
@@ -108,6 +196,8 @@ function App() {
 
       const data = await response.json()
       
+      // Handle various response formats from n8n
+      // Priority: output > text > response > raw string > JSON stringify
       const assistantContent = data.output || data.text || data.response || 
         (typeof data === 'string' ? data : JSON.stringify(data))
 
@@ -120,8 +210,10 @@ function App() {
 
       setMessages(prev => [...prev, assistantMessage])
       
-      // Show confetti if it looks like a complete itinerary
-      if (assistantContent.includes('Itinerary') || assistantContent.includes('TOTAL') || assistantContent.includes('✈️')) {
+      // Celebrate complete itineraries with confetti!
+      if (assistantContent.includes('Itinerary') || 
+          assistantContent.includes('TOTAL') || 
+          assistantContent.includes('✈️')) {
         setShowConfetti(true)
         setTimeout(() => setShowConfetti(false), 4000)
       }
@@ -143,18 +235,35 @@ function App() {
     }
   }
 
+  /**
+   * Clears the chat and shows a fresh welcome message.
+   * Called when user clicks "New Trip" button.
+   */
   const clearChat = () => {
     setMessages([createWelcomeMessage()])
   }
 
+  /**
+   * Handles quick pick destination selection.
+   * Sends a pre-formatted message for the selected destination.
+   * 
+   * @param {string} destination - Selected destination name
+   */
   const handleQuickPick = (destination) => {
     sendMessage(`I want to go to ${destination} for a week. Best value options please!`)
   }
 
+  /**
+   * Toggles between light and dark mode.
+   */
   const toggleDarkMode = () => {
     setDarkMode(prev => !prev)
   }
 
+  /**
+   * Shares the trip itinerary via native share API or clipboard.
+   * Collects all assistant messages (excluding welcome and errors).
+   */
   const shareTrip = async () => {
     const tripContent = messages
       .filter(m => m.role === 'assistant' && !m.isWelcome && !m.isError)
@@ -176,6 +285,7 @@ function App() {
     }
   }
 
+  // Determine if there's content worth sharing
   const hasItinerary = messages.some(m => 
     m.role === 'assistant' && !m.isWelcome && !m.isError
   )
@@ -233,7 +343,12 @@ function App() {
   )
 }
 
-// Confetti component
+/**
+ * Confetti celebration animation component.
+ * Renders falling confetti pieces when an itinerary is complete.
+ * 
+ * @returns {JSX.Element} Confetti animation overlay
+ */
 function Confetti() {
   const colors = ['#c4a574', '#a08050', '#f5f2ed', '#6b6560', '#2d2926']
   const confetti = Array.from({ length: 50 }, (_, i) => ({
