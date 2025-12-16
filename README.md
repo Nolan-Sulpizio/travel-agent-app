@@ -199,8 +199,8 @@ npm run preview
 
 ## License
 
-MIT © Nolan Sulpizio
+MIT © Nolan Sulpizio----- CLEAN PLATE INNOVATIONS
 
 ---
 
-Built with ❤️ using Claude + n8n
+Built with ❤️ using Claude + n8n ----CLEANPLATEINNOVATIONS
